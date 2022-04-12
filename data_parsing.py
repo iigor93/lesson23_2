@@ -1,7 +1,7 @@
-from flask import request, abort
+﻿from flask import request, abort
 from marshmallow_dataclass import class_schema
 from dataclasses import dataclass, field
-from typing import Optional
+from typing import Optional, Union, Dict, Mapping, Any, Iterable
 
 
 @dataclass
@@ -21,7 +21,7 @@ def get_dict() -> Optional[CommandData]:
     if request.is_json:
         data = request.json
     elif request.form.get('query'):
-        data_received = request.form.get('query').split('|')
+        data_received = str(request.form.get('query')).split('|')
         data = {}
 
         for item in data_received:
@@ -30,9 +30,15 @@ def get_dict() -> Optional[CommandData]:
                 data[temp_val[0]] = temp_val[1]
             except IndexError:
                 data[temp_val[0]] = True
+                
+    elif request.values.get('cmd1'):
+        data = {request.values.get('cmd1'): request.values.get('value1'),
+                request.values.get('cmd2'): request.values.get('value2'),
+                "filename": request.values.get('file_name')}
+        
     else:
         return abort(400)
-
+    
     for item in commands:
         if item in data:
             command_data_schema = class_schema(CommandData)
