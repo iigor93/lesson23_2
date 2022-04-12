@@ -18,6 +18,7 @@ class CommandData:
 def get_dict() -> CommandData:
     """Получаем из запроса команды"""
     commands = ('filter', 'unique', 'map', 'limit', 'sort', 'regex', 'filename')
+
     if request.is_json:
         data = request.json
     elif request.form.get('query'):
@@ -40,9 +41,9 @@ def get_dict() -> CommandData:
         return abort(400)
     
     for item in commands:
-        if item in data:
+        if item in data:  # type: ignore
             command_data_schema = class_schema(CommandData)
-            commands_data = command_data_schema().load(data)
+            commands_data = command_data_schema().load(data)  # type: ignore
             return commands_data
 
     return abort(400)
