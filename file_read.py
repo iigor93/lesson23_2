@@ -1,39 +1,39 @@
 import os
+import re
 from flask import abort
+from data_parsing import CommandData
+from typing import List, Optional
 
 
-def file_read(commands):
+def file_read(commands_data: CommandData) -> Optional[List]:
     """Читаем файл согласно командам из запроса"""
 
-    user_filter = commands.get('filter') if commands.get('filter') else ''
-    unique = True if commands.get('unique') else False
-    limit = int(commands.get('limit')) if commands.get('limit') else 10
-    column = int(commands.get('map')) if commands.get('map') is not None else -1
-    reverse = True if commands.get('sort') == 'desc' else False
-
-    filename = commands.get('filename') if commands.get('filename') else 'apache_logs.txt'
     folder = 'data//'
     files = os.listdir(folder)
 
-    if filename not in files:
+    if commands_data.filename not in files:
         return abort(400)
 
-    filename = folder + filename
+    filename = folder + commands_data.filename
 
     f = (row for row in open(filename))
 
-    if column >= 0:
-        lines = filter(lambda string: user_filter in string.split(' ')[column], f)
-        map_lines = (thing.split(' ')[column] for thing in lines)
+    if commands_data.column >= 0:
+        lines = filter(lambda string: commands_data.filter in string.split(' ')[commands_data.column], f)
+        map_lines = (thing.split(' ')[commands_data.column] for thing in lines)
     else:
-        map_lines = filter(lambda string: user_filter in string, f)
+        map_lines = filter(lambda string: commands_data.filter in string, f)
 
-    if unique:
+    if commands_data.regex != '':
+        map_lines = [line for line in map_lines if re.search(commands_data.regex, line)]
+
+    if commands_data.unique:
         map_lines = list(set(map_lines))
 
-    if limit > 0:
-        map_lines = list(map_lines)[: limit]
+    if commands_data.limit > 0:
+        map_lines = list(map_lines)[: commands_data.limit]
 
+    reverse = True if commands_data.sort == 'desc' else False
     return_list = sorted(map_lines, reverse=reverse)
 
     return return_list

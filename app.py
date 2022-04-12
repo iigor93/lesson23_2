@@ -23,8 +23,8 @@ def perform_query():
         return post_example, 200
 
     if request.method == 'POST':
-        commands = get_dict()
-        data = file_read(commands)
+        commands_data = get_dict()
+        data = file_read(commands_data)
 
         return jsonify(data)
 
