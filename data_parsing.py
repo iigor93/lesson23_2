@@ -15,7 +15,7 @@ class CommandData:
     column: int = field(default=-1, metadata={"data_key": "map"})
 
 
-def get_dict() -> Optional[CommandData]:
+def get_dict() -> CommandData:
     """Получаем из запроса команды"""
     commands = ('filter', 'unique', 'map', 'limit', 'sort', 'regex', 'filename')
     if request.is_json:
